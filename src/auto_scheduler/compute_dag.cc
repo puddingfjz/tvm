@@ -1471,13 +1471,14 @@ Array<Integer> MyGetStepNodeInfor(const ComputeDAG& dag, const State& state, int
 			ret.push_back(lengths[i]);
 		}
 	}
-	else if (auto ps = step.as<AnnotationStepNode>()) {
+	else if (auto ps = step.as<PragmaStepNode>()) {
 		int stageId = ps->stage_id;
 		int iterId = ps->iter_id;
-		if (ps->annotation == IteratorAnnotation::kUnroll) {
+		if (StrStartsWith(ps->pragma_type, "auto_unroll_max_step")) {
 			ret.push_back(2);
 			ret.push_back(stageId);
 			ret.push_back(iterId);
+			//the unroll val can be abtained in python, always the last step in the untoll step
 		}
 		else
 			ret.push_back(0);
