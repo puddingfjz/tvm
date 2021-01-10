@@ -1445,6 +1445,49 @@ Array<PrimExpr> GetShapeFromRewrittenLayout(String rewritten_layout, Array<Strin
   return ret;
 }
 
+
+
+std::vector<int> MyGetStepNodeInfor(const ComputeDAG& dag, const State& state, int step_id) {
+	std::vector<int> ret;
+	const Step& step = state->transform_steps[step_id];
+	//type 1:splitstepnode   type 2: unroll step node
+	if (auto ps = step.as<SplitStepNode>()) {
+		int stageId = ps->stage_id;
+		int iterId = ps->iter_id;
+		int extent = GetIntImm(ps->extent.value());
+		//get current tile sizes
+		std::vector<int> lengths(ps->lengths.size() + 1, 1);
+		for (int i = 0; i < static_cast<int>(ps->lengths.size()); ++i) {
+			lengths[i + 1] = GetIntImm(ps->lengths[i].value());
+		}
+		lengths[0] = extent / ElementProduct(lengths);
+		int inner_to_outer = ps->inner_to_outer ? 1 : 0;
+		ret.push_back(1); // means this node is of type 1
+		ret.push_back(stageId);
+		ret.push_back(iterId);
+		ret.push_back(extent);
+		ret.push_back(inner_to_outer);
+		ret.insert(ret.end(), lengths.begin(), lengths.end());
+	}
+	else if (auto ps = step.as<AnnotationStepNode>()) {
+		int stageId = ps->stage_id;
+		int iterId = ps->iter_id;
+		if (ps->annotation == IteratorAnnotation::kUnroll) {
+			ret.push_back(2);
+			ret.push_back(stageId);
+			ret.push_back(iterId);
+		}
+		else
+			ret.push_back(0);
+	}
+	return ret;
+}
+
+
+
+
+
+
 TVM_REGISTER_GLOBAL("auto_scheduler.ComputeDAG")
     .set_body_typed([](Optional<Array<te::Tensor>> tensors, Optional<te::Schedule> sch) {
       if (sch) {
@@ -1494,41 +1537,8 @@ TVM_REGISTER_GLOBAL("auto_scheduler.GetShapeFromRewrittenLayout")
 
 
 //my own helper function
-TVM_REGISTER_GLOBAL("auto_scheduler.GetStepNodeInfor").set_body_typed([](const ComputeDAG& dag, const State& state, int step_id) {
-	std::vector<int> ret;
-	const Step& step = state->transform_steps[step_id];
-	//type 1:splitstepnode   type 2: unroll step node
-	if (auto ps = step.as<SplitStepNode>()) {
-		int stageId = ps->stage_id;
-		int iterId = ps->iter_id;
-		int extent = GetIntImm(ps->extent.value());
-		//get current tile sizes
-		std::vector<int> lengths(ps->lengths.size() + 1, 1);
-		for (int i = 0; i < static_cast<int>(ps->lengths.size()); ++i) {
-			lengths[i + 1] = GetIntImm(ps->lengths[i].value());
-		}
-		lengths[0] = extent / ElementProduct(lengths);
-		int inner_to_outer = ps->inner_to_outer?1:0;
-		ret.push_back(1); // means this node is of type 1
-		ret.push_back(stageId);
-		ret.push_back(iterId);
-		ret.push_back(extent);
-		ret.push_back(inner_to_outer);
-		ret.insert(ret.end(), lengths.begin(), lengths.end());
-	}
-	else if (auto ps = step.as<AnnotationStepNode>()) {
-		int stageId = ps->stage_id;
-		int iterId = ps->iter_id;
-		if (ps->annotation == IteratorAnnotation::kUnroll) {
-			ret.push_back(2);
-			ret.push_back(stageId);
-			ret.push_back(iterId);
-		}
-		else
-			ret.push_back(0);
-	}
-	return ret;
-});
+TVM_REGISTER_GLOBAL("auto_scheduler.MyGetStepNodeInfor")
+	.set_body_typed(MyGetStepNodeInfor);
 
 }  // namespace auto_scheduler
 }  // namespace tvm
