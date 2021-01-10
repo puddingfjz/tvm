@@ -1455,19 +1455,21 @@ Array<Integer> MyGetStepNodeInfor(const ComputeDAG& dag, const State& state, int
 		int stageId = ps->stage_id;
 		int iterId = ps->iter_id;
 		int extent = GetIntImm(ps->extent.value());
-		//get current tile sizes
-		Array<Integer> lengths(ps->lengths.size() + 1, 1);
-		for (int i = 0; i < static_cast<int>(ps->lengths.size()); ++i) {
-			lengths[i + 1] = GetIntImm(ps->lengths[i].value());
-		}
-		lengths[0] = extent / ElementProduct(lengths);
 		int inner_to_outer = ps->inner_to_outer ? 1 : 0;
 		ret.push_back(1); // means this node is of type 1
 		ret.push_back(stageId);
 		ret.push_back(iterId);
 		ret.push_back(extent);
 		ret.push_back(inner_to_outer);
-		ret.insert(ret.end(), lengths.begin(), lengths.end());
+		//get current tile sizes
+		std::vector<int> lengths(ps->lengths.size() + 1, 1);
+		for (int i = 0; i < static_cast<int>(ps->lengths.size()); ++i) {
+			lengths[i + 1] = GetIntImm(ps->lengths[i].value());
+		}
+		lengths[0] = extent / ElementProduct(lengths);
+		for (size_t i = 0; i < lengths.size(); ++i) {
+			ret.push_back(lengths[i]);
+		}
 	}
 	else if (auto ps = step.as<AnnotationStepNode>()) {
 		int stageId = ps->stage_id;
