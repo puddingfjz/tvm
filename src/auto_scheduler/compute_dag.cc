@@ -1456,7 +1456,7 @@ Array<Integer> MyGetStepNodeInfor(const ComputeDAG& dag, const State& state, int
 		int iterId = ps->iter_id;
 		int extent = GetIntImm(ps->extent.value());
 		//get current tile sizes
-		std::vector<int> lengths(ps->lengths.size() + 1, 1);
+		Array<Integer> lengths(ps->lengths.size() + 1, 1);
 		for (int i = 0; i < static_cast<int>(ps->lengths.size()); ++i) {
 			lengths[i + 1] = GetIntImm(ps->lengths[i].value());
 		}
