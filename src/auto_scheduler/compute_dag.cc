@@ -1448,7 +1448,7 @@ Array<PrimExpr> GetShapeFromRewrittenLayout(String rewritten_layout, Array<Strin
 
 
 std::vector<int> MyGetStepNodeInfor(const ComputeDAG& dag, const State& state, int step_id) {
-	std::vector<int> ret;
+	Array<Integer> ret;
 	const Step& step = state->transform_steps[step_id];
 	//type 1:splitstepnode   type 2: unroll step node
 	if (auto ps = step.as<SplitStepNode>()) {
