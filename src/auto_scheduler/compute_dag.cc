@@ -1513,7 +1513,7 @@ TVM_REGISTER_GLOBAL("auto_scheduler.GetStepNodeInfor").set_body_typed([](const S
 		ret.push_back(iterId);
 		ret.push_back(extent);
 		ret.push_back(inner_to_outer);
-		ret.push_back(ret.end(), lengths.begin(), lengths.end());
+		ret.insert(ret.end(), lengths.begin(), lengths.end());
 	}
 	else if (auto ps = step.as<AnnotationStepNode>()) {
 		int stageId = ps->stage_id;
