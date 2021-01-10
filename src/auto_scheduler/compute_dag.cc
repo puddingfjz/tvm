@@ -1494,8 +1494,9 @@ TVM_REGISTER_GLOBAL("auto_scheduler.GetShapeFromRewrittenLayout")
 
 
 //my own helper function
-TVM_REGISTER_GLOBAL("auto_scheduler.GetStepNodeInfor").set_body_typed([](const Step& step) {
+TVM_REGISTER_GLOBAL("auto_scheduler.GetStepNodeInfor").set_body_typed([](const ComputeDAG& dag, const State& state, int step_id) {
 	std::vector<int> ret;
+	const Step& step = state->transform_steps[step_id];
 	//type 1:splitstepnode   type 2: unroll step node
 	if (auto ps = step.as<SplitStepNode>()) {
 		int stageId = ps->stage_id;
