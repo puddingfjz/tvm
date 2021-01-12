@@ -1489,6 +1489,90 @@ Array<Integer> MyGetStepNodeInfor(const ComputeDAG& dag, const State& state, int
 
 
 
+Array<State> MyGetBestStateFromTunedKnobs(SearchPolicy search_policy, TuningOptions tuning_options,
+	const ComputeDAG& dag_to_tune, const State& state_reused_from,
+	const Array<Array<Array<Optional<Integer>>>>& tile_sizes, 
+	const Array<Optional<Integer>>& multi_split_step_ids, const Array<Optional<Integer>>& vector_split_step_ids, 
+	Array<Optional<Integer>>& tot_config_num, Array<double>& best_result) {
+	// given tile_sizes and the split step ids for multi tiling of thread binding, generate states for measure, and return the best one from them.
+	const Array<Step>& transform_steps = state_reused_from->transform_steps;
+	const State& init_state = dag_to_tune->init_state;
+	size_t config_num = tile_sizes.size();
+	Array<State> tuned_states;
+	for (size_t config_i = 0; config_i < config_num; ++config_i) {
+		//build state for each config
+		State tmp_s = init_state;
+		size_t split_step_i = 0;
+		size_t vector_split_step_i = 0;
+		for (size_t i = 0; i < transform_steps.size(); i++) {
+			if ((split_step_i <= multi_split_step_ids.size()) && (i == multi_split_step_ids[split_step_i])) {
+				const SplitStep& step_reuse = transform_steps[i];
+				auto ps = step_reuse.as<SplitStepNode>();
+				//this is one split step that we have tuned
+				SplitStep step = SplitStep(ps->stage_id, ps->iter_id, ps->extent,
+					Array<Optional<Integer>>(tile_sizes[config_i][split_step_i].begin(), tile_sizes[config_i][split_step_i].end()), ps->inner_to_outer);
+				split_step_i++;
+				tmp_s->CopyOnWrite()->transform_steps.push_back(step);
+				StepApplyToState(step, &tmp_s, dag_to_tune);
+			}
+			else if ((vector_split_step_i <= vector_split_step_ids.size()) && (i == vector_split_step_ids[vector_split_step_i])) {
+				const SplitStep& step_reuse = transform_steps[i];
+				auto ps = step_reuse.as<SplitStepNode>();
+				//this is one split step that for the vectorization in cooperative fetching; the default vectorization value is 1.
+				SplitStep step = SplitStep(ps->stage_id, ps->iter_id, ps->extent, { Integer(1) }, ps->inner_to_outer);
+				vector_split_step_i++;
+				tmp_s->CopyOnWrite()->transform_steps.push_back(step);
+				StepApplyToState(step, &tmp_s, dag_to_tune);
+			}
+			else {
+				//directly copy the step from state_reused_from
+				const Step& step = transform_steps[i];
+				tmp_s->CopyOnWrite()->transform_steps.push_back(step);
+				StepApplyToState(step, &tmp_s, dag_to_tune);
+			}
+		}
+		//we get a state with transform steps applied
+		tuned_states.push_back(tmp_s);
+	}
+	//measure the states we generated
+	tuned_states = dag_to_tune.InferBound(tuned_states);
+	Array<MeasureInput> inputs;
+	Array<MeasureResult> results;
+	for (State state : tuned_states) {
+		inputs.push_back(MeasureInput(search_policy->search_task, state));
+	}
+	// Create a ProgramMeasurer to handle the schedule build and performance measure
+	ProgramMeasurer measurer = 
+		ProgramMeasurer(tuning_options->builder, tuning_options->runner,
+			tuning_options->measure_callbacks, tuning_options->verbose);
+	PrintTitle("Measure", search_policy->verbose);
+	results = measurer->Measure(search_policy->search_task, search_policy, inputs);
+	tot_config_num[0] = tot_config_num[0] + inputs.size(); //update the number of configs being measured
+	PrintTitle("Done", search_policy->verbose);
+	
+	Array<State> ret_state_array;
+	State ret_state =  measurer->best_state[search_policy->search_task->workload_key];
+	if (ret_state.defined()) {
+		ret_state_array.push_back(ret_state);
+		best_result.push_back(measurer->best_flops[search_policy->search_task->workload_key]);
+	}
+	else {
+		StdCout(tuning_options->verbose)
+			<< "No valid state found in this search round. Check if it has traversed all of the "
+			<< "search space." << std::endl;
+		// Return empty array
+	}
+	return ret_state_array;
+}
+
+
+
+
+
+
+
+
+
 
 
 TVM_REGISTER_GLOBAL("auto_scheduler.ComputeDAG")
@@ -1542,6 +1626,12 @@ TVM_REGISTER_GLOBAL("auto_scheduler.GetShapeFromRewrittenLayout")
 //my own helper function
 TVM_REGISTER_GLOBAL("auto_scheduler.MyGetStepNodeInfor")
 	.set_body_typed(MyGetStepNodeInfor);
+
+
+TVM_REGISTER_GLOBAL("auto_scheduler.MyGetBestStateFromTunedKnobs")
+	.set_body_typed(MyGetBestStateFromTunedKnobs);
+});
+
 
 }  // namespace auto_scheduler
 }  // namespace tvm
