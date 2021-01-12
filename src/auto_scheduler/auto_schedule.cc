@@ -71,8 +71,8 @@ std::pair<te::Schedule, Array<te::Tensor>> AutoSchedule(SearchPolicy search_poli
 
 
 //my helper founction
-Array<State> MyPickBestState(SearchPolicy search_policy, TuningOptions tuning_options,
-	const Array<State>& tuned_states, int& tot_config_num, double& best_result) {
+ProgramMeasurer MyMeasureStoreBestState(SearchPolicy search_policy, TuningOptions tuning_options,
+	const Array<State>& tuned_states){//, int& tot_config_num, double& best_result) {
 	Array<MeasureInput> inputs;
 	Array<MeasureResult> results;
 	for (State state : tuned_states) {
@@ -87,25 +87,12 @@ Array<State> MyPickBestState(SearchPolicy search_policy, TuningOptions tuning_op
 		<< Chars('-', 70) << std::endl;
 	//print("Measure", search_policy->verbose);
 	results = measurer->Measure(search_policy->search_task, search_policy, inputs);
-	tot_config_num = tot_config_num + inputs.size(); //update the number of configs being measured
+	int tot_config_num = inputs.size(); //update the number of configs being measured
 	StdCout(search_policy->verbose) << Chars('-', 70) << "\n"
 		<< Chars('-', 30) << "  [ " << "Done" << " ]\n"
 		<< Chars('-', 70) << std::endl;
 	//PrintTitle("Done", search_policy->verbose);
-
-	Array<State> ret_state_array;
-	State ret_state =  measurer->best_state[search_policy->search_task->workload_key];
-	if (ret_state.defined()) {
-		ret_state_array.push_back(ret_state);
-		best_result = measurer->best_flops[search_policy->search_task->workload_key];
-	}
-	else {
-		StdCout(tuning_options->verbose)
-			<< "No valid state found in this search round. Check if it has traversed all of the "
-			<< "search space." << std::endl;
-		// Return empty array
-	}
-	return ret_state_array;
+	return measurer;
 }
 
 
@@ -127,8 +114,8 @@ TVM_REGISTER_GLOBAL("auto_scheduler.AutoSchedule")
       return Array<ObjectRef>{sch, return_tensors};
     });
 
-TVM_REGISTER_GLOBAL("auto_scheduler.MyPickBestState")
-	.set_body_typed(MyPickBestState);
+TVM_REGISTER_GLOBAL("auto_scheduler.MyMeasureStoreBestState")
+	.set_body_typed(MyMeasureStoreBestState);
 
 }  // namespace auto_scheduler
 }  // namespace tvm
