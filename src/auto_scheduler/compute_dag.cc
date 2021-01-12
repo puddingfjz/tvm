@@ -1632,7 +1632,7 @@ TVM_REGISTER_GLOBAL("auto_scheduler.MyGetStepNodeInfor")
 
 TVM_REGISTER_GLOBAL("auto_scheduler.MyGetBestStateFromTunedKnobs")
 	.set_body_typed(MyGetBestStateFromTunedKnobs);
-});
+
 
 
 }  // namespace auto_scheduler
