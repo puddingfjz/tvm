@@ -1505,7 +1505,7 @@ Array<State> MyGetBestStateFromTunedKnobs(//SearchPolicy search_policy, //Tuning
 		State tmp_s = dag_to_tune->init_state;
 		size_t split_step_i = 0;
 		size_t vector_split_step_i = 0;
-		for (size_t i = 0; i < transform_steps.size(); i++) {
+		for (int i = 0; i < (int)transform_steps.size(); i++) {
 			if ((split_step_i <= multi_split_step_ids.size()) && (i == multi_split_step_ids[split_step_i])) {
 				const Step& step_reuse = transform_steps[i];
 				auto ps = step_reuse.as<SplitStepNode>();
