@@ -1490,7 +1490,7 @@ Array<Integer> MyGetStepNodeInfor(const ComputeDAG& dag, const State& state, int
 
 
 Array<State> MyGetBestStateFromTunedKnobs(//SearchPolicy search_policy, //TuningOptions tuning_options,
-	ComputeDAG& dag_to_tune, const State& state_reused_from,
+	const ComputeDAG& dag_to_tune, const State& state_reused_from,
 	const Array<Array<Array<Integer>>>& tile_sizes,
 	const Array<Integer>& multi_split_step_ids, const Array<Integer>& vector_split_step_ids){
 	//Array<Optional<Integer>>& tot_config_num, Array<double>& best_result
