@@ -72,7 +72,7 @@ std::pair<te::Schedule, Array<te::Tensor>> AutoSchedule(SearchPolicy search_poli
 
 //my helper founction
 Array<State> MyPickBestState(SearchPolicy search_policy, TuningOptions tuning_options,
-	Array<State>& tuned_states, int& tot_config_num, double& best_result) {
+	const Array<State>& tuned_states, int& tot_config_num, double& best_result) {
 	Array<MeasureInput> inputs;
 	Array<MeasureResult> results;
 	for (State state : tuned_states) {
