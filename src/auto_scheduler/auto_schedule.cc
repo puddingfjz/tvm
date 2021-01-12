@@ -82,10 +82,16 @@ Array<State> MyPickBestState(SearchPolicy search_policy, TuningOptions tuning_op
 	ProgramMeasurer measurer =
 		ProgramMeasurer(tuning_options->builder, tuning_options->runner,
 						tuning_options->measure_callbacks, tuning_options->verbose);
-	PrintTitle("Measure", search_policy->verbose);
+	StdCout(search_policy->verbose) << Chars('-', 70) << "\n"
+		<< Chars('-', 30) << "  [ " << "Measure" << " ]\n"
+		<< Chars('-', 70) << std::endl;
+	//print("Measure", search_policy->verbose);
 	results = measurer->Measure(search_policy->search_task, search_policy, inputs);
 	tot_config_num = tot_config_num + inputs.size(); //update the number of configs being measured
-	PrintTitle("Done", search_policy->verbose);
+	StdCout(search_policy->verbose) << Chars('-', 70) << "\n"
+		<< Chars('-', 30) << "  [ " << "Done" << " ]\n"
+		<< Chars('-', 70) << std::endl;
+	//PrintTitle("Done", search_policy->verbose);
 
 	Array<State> ret_state_array;
 	State ret_state =  measurer->best_state[search_policy->search_task->workload_key];
