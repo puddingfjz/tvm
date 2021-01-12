@@ -1489,24 +1489,25 @@ Array<Integer> MyGetStepNodeInfor(const ComputeDAG& dag, const State& state, int
 
 
 
-Array<State> MyGetBestStateFromTunedKnobs(SearchPolicy search_policy, TuningOptions tuning_options,
-	const ComputeDAG& dag_to_tune, const State& state_reused_from,
-	const Array<Array<Array<Optional<Integer>>>>& tile_sizes, 
-	const Array<Optional<Integer>>& multi_split_step_ids, const Array<Optional<Integer>>& vector_split_step_ids, 
-	Array<Optional<Integer>>& tot_config_num, Array<double>& best_result) {
+Array<State> MyGetBestStateFromTunedKnobs(//SearchPolicy search_policy, //TuningOptions tuning_options,
+	ComputeDAG& dag_to_tune, const State& state_reused_from,
+	const Array<Array<Array<Integer>>>& tile_sizes,
+	const Array<Integer>& multi_split_step_ids, const Array<Integer>& vector_split_step_ids,
+	//Array<Optional<Integer>>& tot_config_num, Array<double>& best_result
+	) {
 	// given tile_sizes and the split step ids for multi tiling of thread binding, generate states for measure, and return the best one from them.
 	const Array<Step>& transform_steps = state_reused_from->transform_steps;
-	const State& init_state = dag_to_tune->init_state;
+	//const State& init_state = dag_to_tune->init_state;
 	size_t config_num = tile_sizes.size();
 	Array<State> tuned_states;
 	for (size_t config_i = 0; config_i < config_num; ++config_i) {
 		//build state for each config
-		State tmp_s = init_state;
+		State tmp_s = dag_to_tune->init_state;
 		size_t split_step_i = 0;
 		size_t vector_split_step_i = 0;
 		for (size_t i = 0; i < transform_steps.size(); i++) {
 			if ((split_step_i <= multi_split_step_ids.size()) && (i == multi_split_step_ids[split_step_i])) {
-				const SplitStep& step_reuse = transform_steps[i];
+				const Step& step_reuse = transform_steps[i];
 				auto ps = step_reuse.as<SplitStepNode>();
 				//this is one split step that we have tuned
 				SplitStep step = SplitStep(ps->stage_id, ps->iter_id, ps->extent,
@@ -1516,7 +1517,7 @@ Array<State> MyGetBestStateFromTunedKnobs(SearchPolicy search_policy, TuningOpti
 				StepApplyToState(step, &tmp_s, dag_to_tune);
 			}
 			else if ((vector_split_step_i <= vector_split_step_ids.size()) && (i == vector_split_step_ids[vector_split_step_i])) {
-				const SplitStep& step_reuse = transform_steps[i];
+				const Step& step_reuse = transform_steps[i];
 				auto ps = step_reuse.as<SplitStepNode>();
 				//this is one split step that for the vectorization in cooperative fetching; the default vectorization value is 1.
 				SplitStep step = SplitStep(ps->stage_id, ps->iter_id, ps->extent, { Integer(1) }, ps->inner_to_outer);
@@ -1536,7 +1537,8 @@ Array<State> MyGetBestStateFromTunedKnobs(SearchPolicy search_policy, TuningOpti
 	}
 	//measure the states we generated
 	tuned_states = dag_to_tune.InferBound(tuned_states);
-	Array<MeasureInput> inputs;
+	return tuned_states;
+	/*Array<MeasureInput> inputs;
 	Array<MeasureResult> results;
 	for (State state : tuned_states) {
 		inputs.push_back(MeasureInput(search_policy->search_task, state));
@@ -1562,7 +1564,7 @@ Array<State> MyGetBestStateFromTunedKnobs(SearchPolicy search_policy, TuningOpti
 			<< "search space." << std::endl;
 		// Return empty array
 	}
-	return ret_state_array;
+	return ret_state_array;*/
 }
 
 
