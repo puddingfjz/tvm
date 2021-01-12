@@ -1513,7 +1513,7 @@ Array<State> MyGetBestStateFromTunedKnobs(//SearchPolicy search_policy, //Tuning
 				SplitStep step = SplitStep(ps->stage_id, ps->iter_id, ps->extent,
 					Array<Optional<Integer>>(tile_sizes[config_i][split_step_i].begin(), tile_sizes[config_i][split_step_i].end()), ps->inner_to_outer);
 				split_step_i++;
-				tmp_s->CopyOnWrite()->transform_steps.push_back(step);
+				tmp_s.CopyOnWrite()->transform_steps.push_back(step);
 				StepApplyToState(step, &tmp_s, dag_to_tune);
 			}
 			else if ((vector_split_step_i <= vector_split_step_ids.size()) && (i == GetIntImm(vector_split_step_ids[vector_split_step_i]))) {
@@ -1522,13 +1522,13 @@ Array<State> MyGetBestStateFromTunedKnobs(//SearchPolicy search_policy, //Tuning
 				//this is one split step that for the vectorization in cooperative fetching; the default vectorization value is 1.
 				SplitStep step = SplitStep(ps->stage_id, ps->iter_id, ps->extent, { Integer(1) }, ps->inner_to_outer);
 				vector_split_step_i++;
-				tmp_s->CopyOnWrite()->transform_steps.push_back(step);
+				tmp_s.CopyOnWrite()->transform_steps.push_back(step);
 				StepApplyToState(step, &tmp_s, dag_to_tune);
 			}
 			else {
 				//directly copy the step from state_reused_from
 				const Step& step = transform_steps[i];
-				tmp_s->CopyOnWrite()->transform_steps.push_back(step);
+				tmp_s.CopyOnWrite()->transform_steps.push_back(step);
 				StepApplyToState(step, &tmp_s, dag_to_tune);
 			}
 		}
