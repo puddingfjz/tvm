@@ -68,6 +68,43 @@ std::pair<te::Schedule, Array<te::Tensor>> AutoSchedule(SearchPolicy search_poli
   }
 }
 
+
+
+//my helper founction
+Array<State> MyPickBestState(SearchPolicy search_policy, TuningOptions tuning_options,
+	Array<State>& tuned_states, int& tot_config_num, double& best_result) {
+	Array<MeasureInput> inputs;
+	Array<MeasureResult> results;
+	for (State state : tuned_states) {
+		inputs.push_back(MeasureInput(search_policy->search_task, state));
+	}
+	// Create a ProgramMeasurer to handle the schedule build and performance measure
+	ProgramMeasurer measurer =
+		ProgramMeasurer(tuning_options->builder, tuning_options->runner,
+						tuning_options->measure_callbacks, tuning_options->verbose);
+	PrintTitle("Measure", search_policy->verbose);
+	results = measurer->Measure(search_policy->search_task, search_policy, inputs);
+	tot_config_num = tot_config_num + inputs.size(); //update the number of configs being measured
+	PrintTitle("Done", search_policy->verbose);
+
+	Array<State> ret_state_array;
+	State ret_state =  measurer->best_state[search_policy->search_task->workload_key];
+	if (ret_state.defined()) {
+		ret_state_array.push_back(ret_state);
+		best_result = measurer->best_flops[search_policy->search_task->workload_key];
+	}
+	else {
+		StdCout(tuning_options->verbose)
+			<< "No valid state found in this search round. Check if it has traversed all of the "
+			<< "search space." << std::endl;
+		// Return empty array
+	}
+	return ret_state_array;
+}
+
+
+
+
 TVM_REGISTER_GLOBAL("auto_scheduler.TuningOptions")
     .set_body_typed([](int num_measure_trials, int early_stopping, int num_measures_per_round,
                        int verbose, ProgramBuilder builder, ProgramRunner runner,
@@ -83,5 +120,9 @@ TVM_REGISTER_GLOBAL("auto_scheduler.AutoSchedule")
       std::tie(sch, return_tensors) = AutoSchedule(search_policy, tuning_options);
       return Array<ObjectRef>{sch, return_tensors};
     });
+
+TVM_REGISTER_GLOBAL("auto_scheduler.MyPickBestState")
+	.set_body_typed(MyPickBestState);
+
 }  // namespace auto_scheduler
 }  // namespace tvm

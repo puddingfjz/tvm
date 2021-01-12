@@ -1489,7 +1489,7 @@ Array<Integer> MyGetStepNodeInfor(const ComputeDAG& dag, const State& state, int
 
 
 
-Array<State> MyGetBestStateFromTunedKnobs(//SearchPolicy search_policy, //TuningOptions tuning_options,
+Array<State> MyGetStatesFromTunedKnobs(//SearchPolicy search_policy, //TuningOptions tuning_options,
 	const ComputeDAG& dag_to_tune, const State& state_reused_from,
 	const Array<Array<Array<Integer>>>& tile_sizes,
 	const Array<Integer>& multi_split_step_ids, const Array<Integer>& vector_split_step_ids){
@@ -1630,8 +1630,8 @@ TVM_REGISTER_GLOBAL("auto_scheduler.MyGetStepNodeInfor")
 	.set_body_typed(MyGetStepNodeInfor);
 
 
-TVM_REGISTER_GLOBAL("auto_scheduler.MyGetBestStateFromTunedKnobs")
-	.set_body_typed(MyGetBestStateFromTunedKnobs);
+TVM_REGISTER_GLOBAL("auto_scheduler.MyGetStatesFromTunedKnobs")
+	.set_body_typed(MyGetStatesFromTunedKnobs);
 
 
 
