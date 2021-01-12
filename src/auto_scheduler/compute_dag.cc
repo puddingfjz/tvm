@@ -1506,7 +1506,7 @@ Array<State> MyGetStatesFromTunedKnobs(//SearchPolicy search_policy, //TuningOpt
 		size_t split_step_i = 0;
 		size_t vector_split_step_i = 0;
 		for (int i = 0; i < (int)transform_steps.size(); i++) {
-			if ((split_step_i <= multi_split_step_ids.size()) && (i == GetIntImm(multi_split_step_ids[split_step_i]))) {
+			if ((split_step_i < multi_split_step_ids.size()) && (i == GetIntImm(multi_split_step_ids[split_step_i]))) {
 				const Step& step_reuse = transform_steps[i];
 				auto ps = step_reuse.as<SplitStepNode>();
 				//this is one split step that we have tuned
@@ -1516,7 +1516,7 @@ Array<State> MyGetStatesFromTunedKnobs(//SearchPolicy search_policy, //TuningOpt
 				tmp_s.CopyOnWrite()->transform_steps.push_back(step);
 				StepApplyToState(step, &tmp_s, dag_to_tune);
 			}
-			else if ((vector_split_step_i <= vector_split_step_ids.size()) && (i == GetIntImm(vector_split_step_ids[vector_split_step_i]))) {
+			else if ((vector_split_step_i < vector_split_step_ids.size()) && (i == GetIntImm(vector_split_step_ids[vector_split_step_i]))) {
 				const Step& step_reuse = transform_steps[i];
 				auto ps = step_reuse.as<SplitStepNode>();
 				//this is one split step that for the vectorization in cooperative fetching; the default vectorization value is 1.
