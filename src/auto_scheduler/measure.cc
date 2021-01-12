@@ -324,6 +324,22 @@ void ProgramMeasurerNode::SilentMeasure(const SearchTask& task, const Array<Meas
   }
 }
 
+//my helper function
+int MyGetProgramMeasurerCt(ProgramMeasurer measurer) {
+	return measurer->ct;
+}
+
+State MyGetProgramMeasurerBestState(ProgramMeasurer measurer, const String& workload_key) {
+	return measurer->best_state[workload_key];
+}
+
+double MyGetProgramMeasurerBestFlops(ProgramMeasurer measurer, const String& workload_key) {
+	return measurer->best_flops[workload_key];
+}
+
+
+
+
 /********** Printing functions **********/
 TVM_STATIC_IR_FUNCTOR(ReprPrinter, vtable)
     .set_dispatch<MeasureInputNode>([](const ObjectRef& ref, ReprPrinter* p) {
@@ -421,6 +437,17 @@ TVM_REGISTER_GLOBAL("auto_scheduler.RPCRunner")
       return RPCRunner(key, host, port, priority, n_parallel, timeout, number, repeat,
                        min_repeat_ms, cooldown_interval, enable_cpu_cache_flush);
     });
+
+
+TVM_REGISTER_GLOBAL("auto_scheduler.MyGetProgramMeasurerCt")
+	.set_body_typed(MyGetProgramMeasurerCt);
+
+TVM_REGISTER_GLOBAL("auto_scheduler.MyGetProgramMeasurerBestState")
+	.set_body_typed(MyGetProgramMeasurerBestState);
+
+TVM_REGISTER_GLOBAL("auto_scheduler.MyGetProgramMeasurerBestFlops")
+	.set_body_typed(MyGetProgramMeasurerBestFlops);
+
 
 }  // namespace auto_scheduler
 }  // namespace tvm

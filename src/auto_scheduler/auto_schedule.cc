@@ -87,7 +87,7 @@ ProgramMeasurer MyMeasureStoreBestState(SearchPolicy search_policy, TuningOption
 		<< Chars('-', 70) << std::endl;
 	//print("Measure", search_policy->verbose);
 	results = measurer->Measure(search_policy->search_task, search_policy, inputs);
-	int tot_config_num = inputs.size(); //update the number of configs being measured
+	//int tot_config_num = inputs.size(); //update the number of configs being measured
 	StdCout(search_policy->verbose) << Chars('-', 70) << "\n"
 		<< Chars('-', 30) << "  [ " << "Done" << " ]\n"
 		<< Chars('-', 70) << std::endl;
