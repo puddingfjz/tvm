@@ -329,8 +329,13 @@ int MyGetProgramMeasurerCt(ProgramMeasurer measurer) {
 	return measurer->ct;
 }
 
-State MyGetProgramMeasurerBestState(ProgramMeasurer measurer, const String& workload_key) {
-	return measurer->best_state[workload_key];
+Array<State> MyGetProgramMeasurerBestState(ProgramMeasurer measurer, const String& workload_key) {
+	State state = measurer->best_state[workload_key];
+	Array<State> ret_states;
+	if (state.defined()) {
+		ret_states.push_back(state);
+	}
+	return ret_states;
 }
 
 double MyGetProgramMeasurerBestFlops(ProgramMeasurer measurer, const String& workload_key) {
