@@ -1500,12 +1500,12 @@ Array<State> MyGetStatesFromTunedKnobs(//SearchPolicy search_policy, //TuningOpt
 	//const State& init_state = dag_to_tune->init_state;
 	size_t config_num = tile_sizes.size();
 
-	std::cout << "TOT NUM OF configs: " << config_num << std::endl;
+	//std::cout << "TOT NUM OF configs: " << config_num << std::endl;
 
 	Array<State> tuned_states;
 	for (size_t config_i = 0; config_i < config_num; ++config_i) {
 
-		std::cout << "which config: " << config_i << std::endl;
+		//std::cout << "which config: " << config_i << std::endl;
 		
 		//build state for each config
 		State tmp_s = dag_to_tune->init_state;
@@ -1513,11 +1513,11 @@ Array<State> MyGetStatesFromTunedKnobs(//SearchPolicy search_policy, //TuningOpt
 		size_t vector_split_step_i = 0;
 		for (int i = 0; i < (int)transform_steps.size(); i++) {
 			
-			std::cout << "which step: " << i << std::endl;
+			//std::cout << "which step: " << i << std::endl;
 			
 			if ((split_step_i < multi_split_step_ids.size()) && (i == GetIntImm(multi_split_step_ids[split_step_i]))) {
 				
-				std::cout << "which multi split step: " << split_step_i << "  the order in seq: " << GetIntImm(multi_split_step_ids[split_step_i]) << std::endl;
+				//std::cout << "which multi split step: " << split_step_i << "  the order in seq: " << GetIntImm(multi_split_step_ids[split_step_i]) << std::endl;
 
 				const Step& step_reuse = transform_steps[i];
 				auto ps = step_reuse.as<SplitStepNode>();
@@ -1530,7 +1530,7 @@ Array<State> MyGetStatesFromTunedKnobs(//SearchPolicy search_policy, //TuningOpt
 			}
 			else if ((vector_split_step_i < vector_split_step_ids.size()) && (i == GetIntImm(vector_split_step_ids[vector_split_step_i]))) {
 
-				std::cout << "which vector split step: " << vector_split_step_i << "  the order in seq: " << GetIntImm(vector_split_step_ids[vector_split_step_i]) << std::endl;
+				//std::cout << "which vector split step: " << vector_split_step_i << "  the order in seq: " << GetIntImm(vector_split_step_ids[vector_split_step_i]) << std::endl;
 
 				const Step& step_reuse = transform_steps[i];
 				auto ps = step_reuse.as<SplitStepNode>();
@@ -1542,7 +1542,7 @@ Array<State> MyGetStatesFromTunedKnobs(//SearchPolicy search_policy, //TuningOpt
 			}
 			else {
 				
-				std::cout << "NOT A SPLIT SEQ " << std::endl;
+				//std::cout << "NOT A SPLIT SEQ " << std::endl;
 
 				//directly copy the step from state_reused_from
 				const Step& step = transform_steps[i];
@@ -1554,13 +1554,13 @@ Array<State> MyGetStatesFromTunedKnobs(//SearchPolicy search_policy, //TuningOpt
 		tuned_states.push_back(tmp_s);
 	}
 
-	std::cout << "BEFORE WE InferBound" << std::endl;
-	std::cout << "TOT NUM OF states: " << tuned_states.size() << std::endl;
+	//std::cout << "BEFORE WE InferBound" << std::endl;
+	//std::cout << "TOT NUM OF states: " << tuned_states.size() << std::endl;
 
-
-	//measure the states we generated
-	tuned_states = dag_to_tune.InferBound(tuned_states);
 	return tuned_states;
+	//measure the states we generated
+	//tuned_states = dag_to_tune.InferBound(tuned_states);
+	//return tuned_states;
 	/*Array<MeasureInput> inputs;
 	Array<MeasureResult> results;
 	for (State state : tuned_states) {
