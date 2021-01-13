@@ -116,7 +116,7 @@ State MyTestWhyNotMeasure(SearchPolicy search_policy, TuningOptions tuning_optio
 			<< Chars('-', 70) << std::endl;
 		inputs.push_back(MeasureInput(search_policy->search_task, state));
 		results = measurer->Measure(search_policy->search_task, search_policy, inputs);
-		StdCout(search_policy->verbose) << 1.0 / FloatArrayMean(results[0]->costs) << (measurer->best_flops) / (search_policy->search_task->compute_dag->flop_ct) << std::endl;
+		StdCout(search_policy->verbose) << 1.0 / FloatArrayMean(results[0]->costs) << (measurer->best_flops[search_policy->search_task->workload_key]) / (search_policy->search_task->compute_dag->flop_ct) << std::endl;
 		StdCout(search_policy->verbose) << Chars('-', 70) << "\n"
 			<< Chars('-', 30) << "  [ " << "Done" << " ]\n"
 			<< Chars('-', 70) << std::endl;
