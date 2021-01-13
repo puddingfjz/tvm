@@ -1499,6 +1499,9 @@ Array<State> MyGetStatesFromTunedKnobs(//SearchPolicy search_policy, //TuningOpt
 	const Array<Step>& transform_steps = state_reused_from->transform_steps;
 	//const State& init_state = dag_to_tune->init_state;
 	size_t config_num = tile_sizes.size();
+
+	std::cout << "TOT NUM OF configs: " << config_num << std::endl;
+
 	Array<State> tuned_states;
 	for (size_t config_i = 0; config_i < config_num; ++config_i) {
 
@@ -1550,6 +1553,11 @@ Array<State> MyGetStatesFromTunedKnobs(//SearchPolicy search_policy, //TuningOpt
 		//we get a state with transform steps applied
 		tuned_states.push_back(tmp_s);
 	}
+
+	std::cout << "BEFORE WE InferBound" << std::endl;
+	std::cout << "TOT NUM OF states: " << tuned_states.size() << std::endl;
+
+
 	//measure the states we generated
 	tuned_states = dag_to_tune.InferBound(tuned_states);
 	return tuned_states;
