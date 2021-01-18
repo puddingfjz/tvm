@@ -1522,7 +1522,7 @@ Array<State> MyGetStatesFromTunedKnobs(//SearchPolicy search_policy, //TuningOpt
 				const Step& step_reuse = transform_steps[i];
 				auto ps = step_reuse.as<SplitStepNode>();
 				//this is one split step that we have tuned
-				const Stage& stage = tmp_s.operator->()->stages[ps->stage_id];
+				const Stage& stage = tmp_s->stages[ps->stage_id];
 				const Iterator& it = stage->iters[ps->iter_id];
 				Optional<PrimExpr> eee = it->range.defined() ? it->range->extent : PrimExpr();
 				SplitStep step = SplitStep(ps->stage_id, ps->iter_id, 
@@ -1543,7 +1543,7 @@ Array<State> MyGetStatesFromTunedKnobs(//SearchPolicy search_policy, //TuningOpt
 				const Step& step_reuse = transform_steps[i];
 				auto ps = step_reuse.as<SplitStepNode>();
 				//this is one split step that for the vectorization in cooperative fetching; the default vectorization value is 1.
-				const Stage& stage = tmp_s.operator->()->stages[ps->stage_id];
+				const Stage& stage = tmp_s->stages[ps->stage_id];
 				const Iterator& it = stage->iters[ps->iter_id];
 				Optional<PrimExpr> eee = it->range.defined() ? it->range->extent : PrimExpr();
 				SplitStep step = SplitStep(ps->stage_id, ps->iter_id, 
