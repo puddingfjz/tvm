@@ -1526,11 +1526,11 @@ Array<State> MyGetStatesFromTunedKnobs(//SearchPolicy search_policy, //TuningOpt
 				const Iterator& it = stage->iters[ps->iter_id];
 				Optional<PrimExpr> eee = it->range.defined() ? it->range->extent : PrimExpr();
 				SplitStep step = SplitStep(ps->stage_id, ps->iter_id, 
-					GetIntImm(eee.value()),
+					it->range.defined() ? it->range->extent : PrimExpr(),
 					Array<Optional<Integer>>(tile_sizes[config_i][split_step_i].begin(), tile_sizes[config_i][split_step_i].end()), ps->inner_to_outer);
 				
 				std::cout << "split step infor: " << ps->stage_id <<", " << ps->iter_id << ", " 
-					<< it->range.defined() ? it->range->extent : PrimExpr() << ", " << ps->inner_to_outer << ", " << std::endl;
+					<< GetIntImm(eee.value()) << ", " << ps->inner_to_outer << ", " << std::endl;
 				
 				split_step_i++;
 				tmp_s.CopyOnWrite()->transform_steps.push_back(step);
@@ -1547,12 +1547,12 @@ Array<State> MyGetStatesFromTunedKnobs(//SearchPolicy search_policy, //TuningOpt
 				const Iterator& it = stage->iters[ps->iter_id];
 				Optional<PrimExpr> eee = it->range.defined() ? it->range->extent : PrimExpr();
 				SplitStep step = SplitStep(ps->stage_id, ps->iter_id, 
-					GetIntImm(eee.value()),
+					it->range.defined() ? it->range->extent : PrimExpr(),
 					Array<Optional<Integer>>(tile_sizes[config_i][multi_split_step_ids.size()+ vector_split_step_i].begin(), tile_sizes[config_i][multi_split_step_ids.size() + vector_split_step_i].end()), 
 					ps->inner_to_outer);
 				
 				std::cout << "split step infor: " << ps->stage_id << ", " << ps->iter_id << ", "
-					<< it->range.defined() ? it->range->extent : PrimExpr() << ", " << ps->inner_to_outer << ", " << std::endl;
+					<< GetIntImm(eee.value()) << ", " << ps->inner_to_outer << ", " << std::endl;
 
 				vector_split_step_i++;
 				tmp_s.CopyOnWrite()->transform_steps.push_back(step);
