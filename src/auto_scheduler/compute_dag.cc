@@ -1454,7 +1454,7 @@ Array<Integer> MyGetStepNodeInfor(const ComputeDAG& dag, const State& state, int
 	if (auto ps = step.as<SplitStepNode>()) {
 		int stageId = ps->stage_id;
 		int iterId = ps->iter_id;
-		int extent = GetIntImm(ps->extent.value());
+		int extent = GetIntImm(ps->extent.value()); 
 		int inner_to_outer = ps->inner_to_outer ? 1 : 0;
 		ret.push_back(1); // means this node is of type 1
 		ret.push_back(stageId);
