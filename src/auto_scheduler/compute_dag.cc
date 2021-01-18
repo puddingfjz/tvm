@@ -1454,7 +1454,7 @@ Array<Integer> MyGetStepNodeInfor(const ComputeDAG& dag, const State& state, int
 	if (auto ps = step.as<SplitStepNode>()) {
 		int stageId = ps->stage_id;
 		int iterId = ps->iter_id;
-		int extent = GetIntImm(ps->extent.value()); 
+		int extent = (ps->extent.defined())? GetIntImm(ps->extent.value()) : -1;
 		int inner_to_outer = ps->inner_to_outer ? 1 : 0;
 		ret.push_back(1); // means this node is of type 1
 		ret.push_back(stageId);
@@ -1466,7 +1466,7 @@ Array<Integer> MyGetStepNodeInfor(const ComputeDAG& dag, const State& state, int
 		for (int i = 0; i < static_cast<int>(ps->lengths.size()); ++i) {
 			lengths[i + 1] = GetIntImm(ps->lengths[i].value());
 		}
-		lengths[0] = extent / ElementProduct(lengths);
+		lengths[0] = -1;// extent / ElementProduct(lengths);
 		for (size_t i = 0; i < lengths.size(); ++i) {
 			ret.push_back(lengths[i]);
 		}
@@ -1524,13 +1524,13 @@ Array<State> MyGetStatesFromTunedKnobs(//SearchPolicy search_policy, //TuningOpt
 				//this is one split step that we have tuned
 				const Stage& stage = tmp_s->stages[ps->stage_id];
 				const Iterator& it = stage->iters[ps->iter_id];
-				Optional<PrimExpr> eee = it->range.defined() ? it->range->extent : PrimExpr();
+				//Optional<PrimExpr> eee = it->range.defined() ? it->range->extent : PrimExpr();
 				SplitStep step = SplitStep(ps->stage_id, ps->iter_id, 
 					it->range.defined() ? it->range->extent : PrimExpr(),
 					Array<Optional<Integer>>(tile_sizes[config_i][split_step_i].begin(), tile_sizes[config_i][split_step_i].end()), ps->inner_to_outer);
 				
-				std::cout << "split step infor: " << ps->stage_id <<", " << ps->iter_id << ", " 
-					<< GetIntImm(eee.value()) << ", " << ps->inner_to_outer << ", " << std::endl;
+				//std::cout << "split step infor: " << ps->stage_id <<", " << ps->iter_id << ", " 
+					//<< GetIntImm(eee.value()) << ", " << ps->inner_to_outer << ", " << std::endl;
 				
 				split_step_i++;
 				tmp_s.CopyOnWrite()->transform_steps.push_back(step);
@@ -1545,14 +1545,14 @@ Array<State> MyGetStatesFromTunedKnobs(//SearchPolicy search_policy, //TuningOpt
 				//this is one split step that for the vectorization in cooperative fetching; the default vectorization value is 1.
 				const Stage& stage = tmp_s->stages[ps->stage_id];
 				const Iterator& it = stage->iters[ps->iter_id];
-				Optional<PrimExpr> eee = it->range.defined() ? it->range->extent : PrimExpr();
+				//Optional<PrimExpr> eee = it->range.defined() ? it->range->extent : PrimExpr();
 				SplitStep step = SplitStep(ps->stage_id, ps->iter_id, 
 					it->range.defined() ? it->range->extent : PrimExpr(),
 					Array<Optional<Integer>>(tile_sizes[config_i][multi_split_step_ids.size()+ vector_split_step_i].begin(), tile_sizes[config_i][multi_split_step_ids.size() + vector_split_step_i].end()), 
 					ps->inner_to_outer);
 				
-				std::cout << "split step infor: " << ps->stage_id << ", " << ps->iter_id << ", "
-					<< tmp_s->stages[ps->stage_id]->iters[ps->iter_id]->range.defined() << ", " << ps->inner_to_outer << ", " << std::endl;
+				//std::cout << "split step infor: " << ps->stage_id << ", " << ps->iter_id << ", "
+					//<< tmp_s->stages[ps->stage_id]->iters[ps->iter_id]->range.defined() << ", " << ps->inner_to_outer << ", " << std::endl;
 
 				vector_split_step_i++;
 				tmp_s.CopyOnWrite()->transform_steps.push_back(step);
