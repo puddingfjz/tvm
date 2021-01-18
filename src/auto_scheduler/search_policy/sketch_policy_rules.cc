@@ -874,7 +874,7 @@ PopulationGenerationRule::ResultKind InitThreadBind::Apply(SketchPolicyNode* pol
 	  auto tmpp1 = (*state)->stages[stage_id]->iters[0]->range;
 	  auto tmpp2 = (*state)->stages[3]->iters[0]->range;
 	  std::cout << "DURING TUNING split step infor: " << (*state)->stages[stage_id]->iters[0]->range.defined()<<" " << stage_id << " " 
-		  << tmpp1->extent.value() << tmpp2->extent.value() << std::endl;
+		  << tmpp1->extent->value() << tmpp2->extent->value() << std::endl;
       const auto& iters0 = state->split(stage_id, fused, {Integer(1)});
       state->vectorize(stage_id, iters0[1]);
       // Follow split to keep a same thread extent with the root stage
