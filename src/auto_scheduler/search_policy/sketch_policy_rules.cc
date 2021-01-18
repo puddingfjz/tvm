@@ -871,6 +871,7 @@ PopulationGenerationRule::ResultKind InitThreadBind::Apply(SketchPolicyNode* pol
       Iterator fused = state->fuse(stage_id, (*state)->stages[stage_id]->iters);
       // Split out an extra iterator for vectorization
       // The later EvolutionarySearch will try more possibility
+	  std::cout << "DURING TUNING split step infor: " << (*state)->stages[stage_id]->iters[0]->range.defined() << std::endl;
       const auto& iters0 = state->split(stage_id, fused, {Integer(1)});
       state->vectorize(stage_id, iters0[1]);
       // Follow split to keep a same thread extent with the root stage

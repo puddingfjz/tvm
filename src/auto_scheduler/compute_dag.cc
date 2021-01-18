@@ -1552,7 +1552,7 @@ Array<State> MyGetStatesFromTunedKnobs(//SearchPolicy search_policy, //TuningOpt
 					ps->inner_to_outer);
 				
 				std::cout << "split step infor: " << ps->stage_id << ", " << ps->iter_id << ", "
-					<< GetIntImm(eee.value()) << ", " << ps->inner_to_outer << ", " << std::endl;
+					<< tmp_s->stages[ps->stage_id]->iters[ps->iter_id]->range.defined() << ", " << ps->inner_to_outer << ", " << std::endl;
 
 				vector_split_step_i++;
 				tmp_s.CopyOnWrite()->transform_steps.push_back(step);
