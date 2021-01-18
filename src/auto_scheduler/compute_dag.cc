@@ -1527,6 +1527,10 @@ Array<State> MyGetStatesFromTunedKnobs(//SearchPolicy search_policy, //TuningOpt
 				SplitStep step = SplitStep(ps->stage_id, ps->iter_id, 
 					it->range.defined() ? it->range->extent : PrimExpr(),
 					Array<Optional<Integer>>(tile_sizes[config_i][split_step_i].begin(), tile_sizes[config_i][split_step_i].end()), ps->inner_to_outer);
+				
+				std::cout << "split step infor: " << ps->stage_id <<", " << ps->iter_id << ", " 
+					<< it->range.defined() ? it->range->extent : PrimExpr() << ", " << ps->inner_to_outer << ", " << std::endl;
+				
 				split_step_i++;
 				tmp_s.CopyOnWrite()->transform_steps.push_back(step);
 				StepApplyToState(step, &tmp_s, dag_to_tune);
@@ -1544,6 +1548,10 @@ Array<State> MyGetStatesFromTunedKnobs(//SearchPolicy search_policy, //TuningOpt
 					it->range.defined() ? it->range->extent : PrimExpr(),
 					Array<Optional<Integer>>(tile_sizes[config_i][multi_split_step_ids.size()+ vector_split_step_i].begin(), tile_sizes[config_i][multi_split_step_ids.size() + vector_split_step_i].end()), 
 					ps->inner_to_outer);
+				
+				std::cout << "split step infor: " << ps->stage_id << ", " << ps->iter_id << ", "
+					<< it->range.defined() ? it->range->extent : PrimExpr() << ", " << ps->inner_to_outer << ", " << std::endl;
+
 				vector_split_step_i++;
 				tmp_s.CopyOnWrite()->transform_steps.push_back(step);
 				StepApplyToState(step, &tmp_s, dag_to_tune);
