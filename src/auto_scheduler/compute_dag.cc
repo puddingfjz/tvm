@@ -1500,6 +1500,14 @@ Array<Integer> MyGetStepNodeInfor(const ComputeDAG& dag, const State& state, int
 			ret.push_back(stageId);
 			ret.push_back(iterId);
 			//the unroll val can be abtained in python, always the last step in the untoll step
+			size_t pos = 0;
+			for (; pos < ps->pragma_type.size(); ++pos) {
+				if ((*(ps->pragma_type.c_str() + pos)) == '$') {
+					break;
+				}
+			}
+			ICHECK_LT(pos, ps->pragma_type.size()) << "max step value not found.";
+			ret.push_back(atoi(pragma_type.c_str() + pos + 1));
 		}
 		else
 			ret.push_back(0);
@@ -1513,7 +1521,8 @@ Array<Integer> MyGetStepNodeInfor(const ComputeDAG& dag, const State& state, int
 Array<State> MyGetStatesFromTunedKnobs(//SearchPolicy search_policy, //TuningOptions tuning_options,
 	const ComputeDAG& dag_to_tune, const State& state_reused_from,
 	const Array<Array<Array<Integer>>>& tile_sizes,
-	const Array<Integer>& multi_split_step_ids, const Array<Integer>& vector_split_step_ids){
+	const Array<Integer>& multi_split_step_ids, const Array<Integer>& vector_split_step_ids, 
+	const Array<Integer>& auto_unroll_step_ids){
 	//Array<Optional<Integer>>& tot_config_num, Array<double>& best_result
 	//) {
 	// given tile_sizes and the split step ids for multi tiling of thread binding, generate states for measure, and return the best one from them.
@@ -1532,6 +1541,7 @@ Array<State> MyGetStatesFromTunedKnobs(//SearchPolicy search_policy, //TuningOpt
 		State tmp_s = dag_to_tune->init_state;
 		size_t split_step_i = 0;
 		size_t vector_split_step_i = 0;
+		size_t auto_unroll_step_i = 0;
 		for (int i = 0; i < (int)transform_steps.size(); i++) {
 			
 			//std::cout << "which step: " << i << std::endl;
@@ -1576,6 +1586,23 @@ Array<State> MyGetStatesFromTunedKnobs(//SearchPolicy search_policy, //TuningOpt
 					//<< tmp_s->stages[ps->stage_id]->iters[ps->iter_id]->range.defined() << ", " << ps->inner_to_outer << ", " << std::endl;
 
 				vector_split_step_i++;
+				tmp_s.CopyOnWrite()->transform_steps.push_back(step);
+				StepApplyToState(step, &tmp_s, dag_to_tune);
+			}
+			else if ((auto_unroll_step_i < auto_unroll_step_ids.size()) && (i == GetIntImm(auto_unroll_step_ids[auto_unroll_step_i]))) {
+
+				//std::cout << "which vector split step: " << vector_split_step_i << "  the order in seq: " << GetIntImm(vector_split_step_ids[vector_split_step_i]) << std::endl;
+
+				const Step& step_reuse = transform_steps[i];
+				auto ps = step_reuse.as<PragmaStepNode>();
+				//this is one auto unroll pragma step that for auto unroll we have tuned.
+				PragmaStep step  = PragmaStep(ps->stage_id, ps->iter_id,
+					std::string("auto_unroll_max_step") + "$" + std::to_string(tile_sizes[config_i][multi_split_step_ids.size() + vector_split_step_ids.size() + auto_unroll_step_i][0]))
+
+				//std::cout << "split step infor: " << ps->stage_id << ", " << ps->iter_id << ", "
+				//<< tmp_s->stages[ps->stage_id]->iters[ps->iter_id]->range.defined() << ", " << ps->inner_to_outer << ", " << std::endl;
+
+				auto_unroll_step_i++;
 				tmp_s.CopyOnWrite()->transform_steps.push_back(step);
 				StepApplyToState(step, &tmp_s, dag_to_tune);
 			}
