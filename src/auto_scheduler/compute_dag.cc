@@ -1507,7 +1507,7 @@ Array<Integer> MyGetStepNodeInfor(const ComputeDAG& dag, const State& state, int
 				}
 			}
 			ICHECK_LT(pos, ps->pragma_type.size()) << "max step value not found.";
-			ret.push_back(atoi(pragma_type.c_str() + pos + 1));
+			ret.push_back(atoi(ps->pragma_type.c_str() + pos + 1));
 		}
 		else
 			ret.push_back(0);
@@ -1596,8 +1596,8 @@ Array<State> MyGetStatesFromTunedKnobs(//SearchPolicy search_policy, //TuningOpt
 				const Step& step_reuse = transform_steps[i];
 				auto ps = step_reuse.as<PragmaStepNode>();
 				//this is one auto unroll pragma step that for auto unroll we have tuned.
-				PragmaStep step  = PragmaStep(ps->stage_id, ps->iter_id,
-					std::string("auto_unroll_max_step") + "$" + std::to_string(tile_sizes[config_i][multi_split_step_ids.size() + vector_split_step_ids.size() + auto_unroll_step_i][0]))
+				PragmaStep step = PragmaStep(ps->stage_id, ps->iter_id,
+					std::string("auto_unroll_max_step") + "$" + std::to_string(tile_sizes[config_i][multi_split_step_ids.size() + vector_split_step_ids.size() + auto_unroll_step_i][0]));
 
 				//std::cout << "split step infor: " << ps->stage_id << ", " << ps->iter_id << ", "
 				//<< tmp_s->stages[ps->stage_id]->iters[ps->iter_id]->range.defined() << ", " << ps->inner_to_outer << ", " << std::endl;
